@@ -1,14 +1,18 @@
 import { Request, Response } from "express";
 import { AppError } from "../utils/appError.js";
+import { signUpUser } from "../services/auth.service.js";
 
 export async function Login(req:Request, res:Response) {
     try{
 
-        const {email,password}=req.body;
+        const {email,password,fullName}=req.body;
 
-        if(!email || !password){
-            return res.status(400).json({message:"Email and password are required "})
+        if(!email || !password || !fullName){
+            return res.status(400).json({message:"Email, password and fullName are required "})
         }
+
+        await signUpUser(email,password,fullName);
+        
         
 
     }
