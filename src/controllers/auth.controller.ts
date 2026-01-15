@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { AppError } from "../utils/appError.js";
 import { signUpUser } from "../services/auth.service.js";
+import { generateToken } from "../lib/jwt.js";
 
-export async function Login(req:Request, res:Response) {
+export async function Register(req:Request, res:Response) {
     try{
 
         const {email,password,fullName}=req.body;
@@ -11,9 +12,10 @@ export async function Login(req:Request, res:Response) {
             return res.status(400).json({message:"Email, password and fullName are required "})
         }
 
-        await signUpUser(email,password,fullName);
-        
-        
+        const data=await signUpUser(email,password,fullName);
+        const token =generateToken({userId:data.id,email,fullName},'10m');
+        return res.status(201).json({message:"User registered successfully",token});
+           
 
     }
 
@@ -22,6 +24,7 @@ export async function Login(req:Request, res:Response) {
         return res.status(error.statusCode).json({message: error.message});
 
     }
-    return res.status(500).json({message: "Internal Server Error"});
+    console.log('error is ',error)
+    return res.status(500).json({message: "Internal Server Error",error});
 }
 }
