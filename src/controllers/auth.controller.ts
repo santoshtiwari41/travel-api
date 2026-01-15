@@ -13,6 +13,11 @@ export async function Register(req:Request, res:Response) {
         }
 
         const data=await signUpUser(email,password,fullName);
+        
+        if(!data){
+            return res.status(400).json({message:"Failed to register user"});
+        }
+        
         const token =generateToken({userId:data.id,email,fullName},'10m');
         return res.status(201).json({message:"User registered successfully",token});
            
