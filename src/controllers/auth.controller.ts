@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { AppError } from "../utils/appError.js";
 import { loginUser, signUpUser } from "../services/auth.service.js";
 import { generateToken } from "../lib/jwt.js";
+import { generateOTP } from "../lib/otp.js";
+import { saveOTP } from "../services/otp.service.js";
 
 export async function Register(req:Request, res:Response) {
     try{
@@ -17,6 +19,13 @@ export async function Register(req:Request, res:Response) {
         if(!data){
             return res.status(400).json({message:"Failed to register user"});
         }
+
+        const otp=generateOTP();
+        console.log('generated otp is ',otp)
+
+
+        await saveOTP(data.id,otp);
+        console.log('otp saved successfully ')
         
         const token =generateToken({userId:data.id,email,fullName},'10m');
         return res.status(201).json({message:"User registered successfully",token});
