@@ -1,6 +1,6 @@
 import { pgTable, serial, varchar, timestamp, integer, boolean, uuid } from 'drizzle-orm/pg-core';
 // @ts-ignore
-import { users } from './user';
+import { users } from './user.js';
 
 export const otps = pgTable('otps', {
   id: serial('id').primaryKey(),

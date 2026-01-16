@@ -15,6 +15,13 @@
       "when": 1767763909572,
       "tag": "0001_hot_champions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768548615120,
+      "tag": "0002_lame_stark_industries",
+      "breakpoints": true
     }
   ]
 }
