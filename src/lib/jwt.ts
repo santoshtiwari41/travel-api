@@ -17,6 +17,6 @@ export const generateToken = (payload: tokenPayload, expiresIn: SignOptions['exp
 }
 
 
-export const verifyToken = <T = JwtPayload>(token: string): T => {
-  return jwt.verify(token, JWT_SECRET) as T;
-};
+export const verifyToken=async(token:string)=>{
+   return jwt.verify(token,process.env.JWT_SECRET!)
+}
