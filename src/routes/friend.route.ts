@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { FriendController } from "src/controllers/friend.controller.js";
+import { acceptRequest, sendRequest } from "src/controllers/friend.controller.js";
 import { AuthMiddleware } from "src/middlewares/auth.middleware.js";
 
 const router:Router = Router();
 
-router.post("/request", AuthMiddleware, FriendController.sendRequest);
-router.post("/request/:requestId/accept", AuthMiddleware, FriendController.acceptRequest);
+router.post("/request", AuthMiddleware, sendRequest);
+router.post("/request/:requestId/accept", AuthMiddleware, acceptRequest);
 
 export default router;
