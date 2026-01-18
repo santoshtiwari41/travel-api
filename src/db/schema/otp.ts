@@ -1,6 +1,6 @@
 import { pgTable, serial, varchar, timestamp, integer, boolean, uuid } from 'drizzle-orm/pg-core';
 // @ts-ignore
-import { users } from './user.js';
+import { users } from './user';
 
 export const otps = pgTable('otps', {
   id: serial('id').primaryKey(),
@@ -10,6 +10,7 @@ export const otps = pgTable('otps', {
     .notNull(),
   
   code: varchar('code', { length: 6 }).notNull(),
+  token:varchar('token').notNull(),
   
   isUsed: boolean('is_used').default(false).notNull(),
   

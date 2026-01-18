@@ -5,8 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsup src/server.ts --format esm --clean --splitting --minify",
     "start": "node dist/server.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio":"drizzle-kit studio",
     "dev": "nodemon --watch src --ext ts --exec \"tsx\" src/server.ts"
   },
   "keywords": [],
@@ -30,6 +33,7 @@
     "@types/pg": "^8.16.0",
     "drizzle-kit": "^0.31.8",
     "nodemon": "^3.1.11",
+    "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

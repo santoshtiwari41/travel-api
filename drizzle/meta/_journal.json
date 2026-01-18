@@ -22,6 +22,20 @@
       "when": 1768548615120,
       "tag": "0002_lame_stark_industries",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1768564288276,
+      "tag": "0003_silly_fabian_cortez",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1768713096492,
+      "tag": "0004_smart_photon",
+      "breakpoints": true
     }
   ]
 }

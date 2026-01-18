@@ -1,0 +1,1 @@
+ALTER TABLE "otps" ADD COLUMN "token" varchar NOT NULL;

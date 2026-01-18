@@ -1,4 +1,6 @@
-// @ts-ignore
-export {users} from './user.js';
-// @ts-ignore
-export {otps} from './otp.js';
+//@ts-ignore
+export * from './user';
+//@ts-ignore
+export * from './otp';
+//@ts-ignore
+export * from './social'
