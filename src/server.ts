@@ -1,9 +1,20 @@
-import {app} from './app.js';
-import dotenv from 'dotenv';
+import http from "http";
+import { Server } from "socket.io";
+import {app} from "./app.js";
+import { initSockets } from "./sockets/index.js";
 
-dotenv.config();
+const httpServer = http.createServer(app);
 
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*", // restrict in production
+    methods: ["GET", "POST"],
+  },
+});
 
-app.listen(process.env.PORT,()=>{
-    console.log(`Server is running on  http://localhost:${process.env.PORT}`);
-})
+initSockets(io);
+
+const PORT = process.env.PORT || 3000;
+httpServer.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
