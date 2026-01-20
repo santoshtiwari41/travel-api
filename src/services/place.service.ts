@@ -1,15 +1,8 @@
 import { db } from "@/db/drizzle.js"
 import { cities, countries } from "@/db/schema/location.js"
-import { and, eq } from "drizzle-orm";
+import {  asc, count, eq, ilike } from "drizzle-orm";
 import { AppError } from "src/utils/appError.js";
 
-interface City {
-    countryId: string,
-    name: string,
-    lat?: number,
-    lng?: number
-
-}
 export const createCountry = async (name: string, code: string) => {
     const existing = await db
         .select()
@@ -31,24 +24,43 @@ export const getCountry = async () => {
     return data;
 }
 
-export const createCity = async (city: City) => {
-    const existing = await db.select()
-        .from(cities)
-        .where(
-            and(
-                eq(cities.countryId, city.countryId),
-                eq(cities.name, city.name)
-            )
-        );
 
-    if (existing.length > 0) {
-        throw new AppError("This city already exists in this country", 409);
-    }
 
-    return await db.insert(cities).values(city);
+export type GetCitiesParams = {
+  search?: string | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 };
-export const getCity = async () => {
-    const data = await db.select().from(cities);
-    return data;
-}
 
+export const getCities = async ({
+  search,
+  page = 1,
+  limit = 50,
+}: GetCitiesParams) => {
+  const offset = (page - 1) * limit;
+
+  let query = db.select().from(cities).$dynamic();
+  if (search) {
+    query = query.where(ilike(cities.city, `%${search}%`));
+  }
+
+  const data = await query
+    .orderBy(asc(cities.city))
+    .limit(limit)
+    .offset(offset);
+
+
+  const totalResult = await db
+    .select({ total: count() })
+    .from(cities)
+    .where(search ? ilike(cities.city, `%${search}%`) : undefined);
+
+  const totalCount = totalResult[0]?.total ?? 0;
+
+  return {
+    data,
+    total: Number(totalCount),
+    page,
+    limit,
+  };
+};

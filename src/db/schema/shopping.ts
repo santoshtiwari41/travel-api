@@ -1,10 +1,10 @@
-import { pgTable, uuid, varchar, real, boolean } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, real, boolean, bigint } from "drizzle-orm/pg-core";
 //@ts-ignore
 import { cities } from "./location";
 
 export const shoppingCenters = pgTable("shopping_centers", {
   id: uuid("id").defaultRandom().primaryKey(),
-  cityId: uuid("city_id").references(() => cities.id).notNull(),
+  cityId: bigint("city_id",{ mode: "number" }).references(() => cities.id).notNull(),
   name: varchar("name", { length: 120 }).notNull(),
   ratingAvg: real("rating_avg").default(0),
 });

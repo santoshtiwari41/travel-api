@@ -1,10 +1,9 @@
 import { Router } from "express";
-import { CreateCity, CreateCountry, GetCity, GetCountry } from "src/controllers/place.controller.js";
+import { CreateCountry, GetCity, GetCountry } from "src/controllers/place.controller.js";
 
 const router:Router=Router()
 
 router.post('/country',CreateCountry)
-router.post('/city',CreateCity)
 router.get('/country',GetCountry)
 router.get('/city',GetCity)
 

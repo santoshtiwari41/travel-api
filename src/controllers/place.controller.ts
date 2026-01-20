@@ -1,6 +1,6 @@
 import { AppError } from "src/utils/appError.js";
 import { Request, Response } from "express";
-import { createCity, createCountry, getCity, getCountry } from "src/services/place.service.js";
+import { createCountry, getCities, getCountry } from "src/services/place.service.js";
 
 export async function CreateCountry(req: Request, res: Response) {
 
@@ -25,29 +25,7 @@ export async function CreateCountry(req: Request, res: Response) {
     }
 }
 
-export async function CreateCity(req:Request,res:Response){
 
-try{
-  if (!req.body) {
-            return res.status(400).json({ message: "Request body is missing" });
-        }
-    const city=req.body;
-    if(!city.countryId || !city.name){
-        return res.status(400).json({message:"country_id and name are required"})
-    }
-    await createCity(city)
-    return res.status(201).json({message:"city added successfully"})
-}
-
-catch(error){
-    if(error instanceof AppError){
-        return res.status(error.statusCode).json({message:error.message})
-    }
-    return res.status(500).json({ message: 'Internal server Error!!' })
-
-}
-
-}
 
 export async function GetCountry(req: Request, res: Response) {
   try {
@@ -74,15 +52,37 @@ export async function GetCountry(req: Request, res: Response) {
 }
 
 
-export async function GetCity(req:Request,res:Response){
-    try{
-    const city=await getCity()
-    return res.status(200).json({success:true,city:city})
+export async function GetCity(req: Request, res: Response) {
+  try {
+    const search = typeof req.query.search === "string" ? req.query.search : undefined;
+    
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
+
+    const result = await getCities({
+      search,
+      page: isNaN(page) ? 1 : page,
+      limit: isNaN(limit) ? 50 : limit,
+    });
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+    });
+    
+  } catch (error) {
+    console.error("Error in GetCity Controller:", error);
+
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ 
+        success: false, 
+        message: error.message 
+      });
     }
-    catch(error){
-        if(error instanceof AppError){
-            return res.status(error.statusCode).json({message:error.message})
-        }
-        return res.status(500).json({message:"internal server error"})
-    }
+
+    return res.status(500).json({ 
+      success: false, 
+      message: "internal server error" 
+    });
+  }
 }

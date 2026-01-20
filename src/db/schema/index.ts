@@ -3,34 +3,34 @@ export * from './user';
 //@ts-ignore
 export * from './otp';
 //@ts-ignore
-export * from './social'
+// export * from './social'
 //@ts-ignore
 
-export * from './place'
+// export * from './place'
 //@ts-ignore
 
-export * from './food'
+// export * from './food'
 //@ts-ignore
 
-export * from './recommendation'
+// export * from './recommendation'
 //@ts-ignore
 
 export * from './location'
 //@ts-ignore
 
-export * from './review'
+// export * from './review'
 //@ts-ignore
 
-export * from './shopping'
+// export * from './shopping'
 //@ts-ignore
 
-export * from './message'
+// export * from './message'
 //@ts-ignore
 
-export * from './hotel'
+// export * from './hotel'
 //@ts-ignore
 
-export * from './media'
+// export * from './media'
 //@ts-ignore
 
-export * from './activities'
+// export * from './activities'

@@ -4,6 +4,7 @@ import {
   date,
   timestamp,
   pgEnum,
+  bigint,
 } from "drizzle-orm/pg-core";
 // @ts-ignore
 import { users } from "./user";
@@ -26,7 +27,7 @@ export const tripVisibility = pgEnum("trip_visibility", [
 export const trips = pgTable("trips", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").references(() => users.id).notNull(),
-  cityId: uuid("city_id").references(() => cities.id).notNull(),
+  cityId: bigint("city_id",{ mode: "number" }).references(() => cities.id).notNull(),
   startDate: date("start_date").notNull(),
   endDate: date("end_date").notNull(),
   status: tripStatus("status").default("planned"),
