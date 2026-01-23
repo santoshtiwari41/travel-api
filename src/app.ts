@@ -4,6 +4,7 @@ import cors from 'cors'
 import userRoutes from './routes/user.route.js';
 import authRoutes from './routes/auth.route.js';
 import placeRoutes from './routes/place.route.js'
+import tripRoutes from './routes/trip.route.js'
 export const app:Express=express();
 app.use(cors())
 app.use(express.json());
@@ -14,3 +15,4 @@ app.get('/', (_req, res) => {
 app.use('/api/v1/auth',authRoutes)
 app.use('/api/v1/users',userRoutes)
 app.use('/api/v1/place',placeRoutes)
+app.use('/api/v1/trip',tripRoutes)

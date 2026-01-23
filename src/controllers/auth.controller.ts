@@ -7,7 +7,9 @@ import { generateOTP } from "../lib/otp.js";
 
 export async function Register(req:Request, res:Response) {
     try{
-
+         if (!req.body) {
+            return res.status(400).json({ message: "Request body is missing" });
+        }
         const {email,password,fullName}=req.body;
 
         if(!email || !password || !fullName){
@@ -47,6 +49,9 @@ export async function Register(req:Request, res:Response) {
 export async function Login(req:Request, res:Response) {
 
     try{
+         if (!req.body) {
+            return res.status(400).json({ message: "Request body is missing" });
+        }
         const {email,password}=req.body;
 
         if(!email || !password){

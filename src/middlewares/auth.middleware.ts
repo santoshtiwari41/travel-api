@@ -13,7 +13,6 @@ export const AuthMiddleware = async(req: Request, res: Response, next: NextFunct
         }
         const token = authHeader.split(' ')[1]
         const verifyedToken = await verifyToken(token!);
-        console.log('check token verification',verifyedToken)
         if (!verifyedToken) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
