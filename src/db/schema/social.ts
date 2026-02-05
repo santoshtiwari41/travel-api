@@ -17,7 +17,15 @@ export const friendRequests = pgTable("friend_requests", {
 });
 
 export const friends = pgTable("friends", {
-  userId: uuid("user_id").references(() => users.id).notNull(),
-  friendId: uuid("friend_id").references(() => users.id).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
+    
+  friendId: uuid("friend_id")
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
+    
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });

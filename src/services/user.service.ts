@@ -5,20 +5,23 @@ import { and, eq, ilike, sql } from "drizzle-orm";
 import { comparePassword, hashPassword } from "src/lib/password-hash.js";
 import { AppError } from "src/utils/appError.js";
 
-export const getUserProfile = async () => {
+
+export const getProfile = async (userId: string) => {
   const user = await db.select({
     id: users.id,
     fullName: users.fullName,
     email: users.email
-  })
-    .from(users)
-  return user
-};
+  }).from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+  return user[0];
+}
+
 export type userProps = {
   search?: string | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-  currentUserId?:string;
+  currentUserId?: string;
 };
 
 
@@ -70,54 +73,56 @@ export const getUsersByAdmin = async ({
 };
 
 
-export  async function  updateProfile(userId: string, fullName: string) {
-    const updated = await db
-      .update(users)
-      .set({
-        fullName,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, userId))
-      .returning({
-        id: users.id,
-        fullName: users.fullName,
-        email: users.email,
-      });
+export async function updateProfile(userId: string, fullName: string) {
+  const updated = await db
+    .update(users)
+    .set({
+      fullName,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+      fullName: users.fullName,
+      email: users.email,
+    });
 
-    return updated[0];
+  return updated[0];
+}
+
+
+
+export async function updatePassword(
+  userId: string,
+  oldPassword: string,
+  newPassword: string
+) {
+  const user = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (!user.length) {
+    throw new AppError("User not found", 404);
   }
 
-
-
-   export  async function  updatePassword(
-    userId: string,
-    oldPassword: string,
-    newPassword: string
-  ) {
-    const user = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    if (!user.length) {
-      throw new AppError("User not found", 404);  
-    }
-
-    const isValid = await comparePassword(oldPassword, user[0].password);
-    if (!isValid) {
-      throw new AppError("Old password is incorrect", 400);
-    }
-
-    const hashedPassword = await hashPassword(newPassword);
-
-    await db
-      .update(users)
-      .set({
-        password: hashedPassword,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, userId));
-
-    return true;
+  const isValid = await comparePassword(oldPassword, user[0].password);
+  if (!isValid) {
+    throw new AppError("Old password is incorrect", 400);
   }
+
+  const hashedPassword = await hashPassword(newPassword);
+
+  await db
+    .update(users)
+    .set({
+      password: hashedPassword,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId));
+
+  return true;
+}
+
+
