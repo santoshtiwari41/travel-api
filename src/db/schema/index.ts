@@ -6,7 +6,7 @@ export * from './otp'
 export * from './trip'
 export * from './message'
 export * from './social'
-
+export * from './expo-token'
 
 
 
