@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import { MessageService } from "src/services/message.service.js";
 import { AppError } from "src/utils/appError.js";
 
-export async function getHistory(req:Request,res:Response){
-  try{
-const { conversationId } = req.params;
+export async function getHistory(req: Request, res: Response) {
+  try {
+    const { conversationId } = req.params;
     const { page = 0 } = req.query;
 
     const messages = await MessageService.getHistory(
@@ -15,10 +15,10 @@ const { conversationId } = req.params;
 
     res.json(messages);
   }
-  catch(error){
+  catch (error) {
 
-    if(error instanceof AppError){
-        return res.status(error.statusCode).json(error.message)
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json(error.message)
     }
     return res.status(500).json("internal servier error")
   }
