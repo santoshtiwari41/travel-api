@@ -1,13 +1,28 @@
+// src/modules/trip/trip.routes.ts
+
 import { Router } from "express";
-import { CreateTrip, deleteTrips, getAllTrips, getTrips, toggleTrip, updateTrip } from "src/controllers/trip.controller.js";
+import { TripController } from "src/controllers/trip.controller.js";
 import { AuthMiddleware } from "src/middlewares/auth.middleware.js";
+import { TripService } from "src/services/trip.service.js";
 
-const router:Router=Router()
-router.post('/', AuthMiddleware, CreateTrip);         
-router.get('/', AuthMiddleware, getAllTrips);         
-router.get('/active', AuthMiddleware, getTrips);       
-router.put('/active/:id', AuthMiddleware, toggleTrip);
-router.put('/:id', AuthMiddleware, updateTrip);        
-router.delete('/:id', AuthMiddleware, deleteTrips);
 
-export default router ;
+export class TripRoutes {
+  public readonly router: Router;
+
+  constructor() {
+    this.router = Router();
+
+    const tripController = new TripController(TripService);
+
+    this.router.post("/", AuthMiddleware, tripController.createTrip);
+    this.router.get("/", AuthMiddleware, tripController.getAllTrips);
+    this.router.get("/active", AuthMiddleware, tripController.getTrips);
+    this.router.put(
+      "/active/:id",
+      AuthMiddleware,
+      tripController.toggleTrip
+    );
+    this.router.put("/:id", AuthMiddleware, tripController.updateTrip);
+    this.router.delete("/:id", AuthMiddleware, tripController.deleteTrip);
+  }
+}
