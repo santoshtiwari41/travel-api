@@ -1,7 +1,7 @@
 import { db } from "@/db/drizzle.js";
 import { expoToken } from "@/db/schema/expo-token.js";
 import { notification as Notification } from "@/db/schema/notification.js";
-import { inArray, arrayContains } from "drizzle-orm";
+import { and, eq, inArray, arrayContains, not } from "drizzle-orm";
 import { AppError } from "src/utils/appError.js";
 
 export interface SendNotification {
@@ -18,51 +18,56 @@ const chunkArray = <T>(arr: T[], chunkSize: number): T[][] => {
   return result;
 };
 
-export async function sendExpoNotification(
+
+export async function sendOneSignalNotification(
   tokens: string[],
   notification: SendNotification
 ) {
-  const messages = tokens.map((token) => ({
-    to: token,
-    sound: 'default' as const,
-    title: notification.title,
-    body: notification.body,
-    data: notification.data || {},
-  }));
+  const appId = process.env.ONESIGNAL_APP_ID;
+  const apiKey = process.env.ONESIGNAL_API_KEY;
 
-  const chunks = chunkArray(messages, 100);
+  if (!appId || !apiKey) {
+    throw new AppError(
+      "OneSignal is not configured. Set ONESIGNAL_APP_ID and ONESIGNAL_API_KEY env vars.",
+      500
+    );
+  }
+
+  const chunks = chunkArray(tokens, 2000); 
   let successCount = 0;
   let failedCount = 0;
 
   for (const chunk of chunks) {
     try {
-      const response = await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
+      const response = await fetch("https://api.onesignal.com/notifications", {
+        method: "POST",
         headers: {
-          Accept: 'application/json',
-          'Accept-encoding': 'gzip, deflate',
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Basic ${apiKey}`,
         },
-        body: JSON.stringify(chunk),
+        body: JSON.stringify({
+          app_id: appId,
+          include_subscription_ids: chunk,
+          headings: { en: notification.title },
+          contents: { en: notification.body },
+          data: notification.data || {},
+        }),
       });
 
       if (!response.ok) {
+        console.error("OneSignal Notification Error:", await response.text());
         failedCount += chunk.length;
         continue;
       }
 
-      const result = (await response.json()) as { data: any[] };
-      const tickets = result.data || [];
-
-      tickets.forEach((ticket: any) => {
-        if (ticket.status === 'ok') {
-          successCount++;
-        } else {
-          failedCount++;
-        }
-      });
+      const result = (await response.json()) as { id?: string; errors?: any };
+      if (result.id) {
+        successCount += chunk.length;
+      } else {
+        failedCount += chunk.length;
+      }
     } catch (error) {
-      console.error('Expo Notification Error:', error);
+      console.error("OneSignal Notification Error:", error);
       failedCount += chunk.length;
     }
   }
@@ -89,7 +94,7 @@ export async function sendNotificationsToUsers(
 
   const tokens = userTokens.map((ut) => ut.token).filter((token) => token !== null) as string[];
 
-  await sendExpoNotification(tokens, notification);
+  await sendOneSignalNotification(tokens, notification);
 
   await db.insert(Notification).values({
     title: notification.title,
@@ -104,5 +109,54 @@ export async function sendNotificationsToUsers(
 export async function getUserNotifications(userId: string) {
   const notifications = await db.select().from(Notification).where(arrayContains(Notification.sentTo, [userId]));
   return notifications;
+}
+
+export async function markAllNotificationsRead(userId: string) {
+  const unread = await db
+    .select({
+      id: Notification.id,
+      readBy: Notification.readBy,
+    })
+    .from(Notification)
+    .where(
+      and(
+        arrayContains(Notification.sentTo, [userId]),
+        eq(Notification.isDeleted, false),
+        not(arrayContains(Notification.readBy, [userId]))
+      )
+    );
+
+  for (const n of unread) {
+    const current = Array.isArray(n.readBy) ? n.readBy : [];
+    const next = current.includes(userId) ? current : [...current, userId];
+    await db.update(Notification).set({ readBy: next }).where(eq(Notification.id, n.id));
+  }
+
+  return { updated: unread.length };
+}
+
+export async function markNotificationRead(userId: string, notificationId: string) {
+  const rows = await db
+    .select({
+      id: Notification.id,
+      sentTo: Notification.sentTo,
+      readBy: Notification.readBy,
+      isDeleted: Notification.isDeleted,
+    })
+    .from(Notification)
+    .where(eq(Notification.id, notificationId))
+    .limit(1);
+
+  const n = rows[0];
+  if (!n || n.isDeleted) throw new AppError("Notification not found", 404);
+  if (!Array.isArray(n.sentTo) || !n.sentTo.includes(userId)) {
+    throw new AppError("Not allowed", 403);
+  }
+
+  const current = Array.isArray(n.readBy) ? n.readBy : [];
+  const next = current.includes(userId) ? current : [...current, userId];
+  await db.update(Notification).set({ readBy: next }).where(eq(Notification.id, notificationId));
+
+  return { updated: true };
 }
 
